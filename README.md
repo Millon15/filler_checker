@@ -1,11 +1,22 @@
-# Fillit checker
-*Checker for the 42 Fillit project*
+# Filler checker
+*Checker for the 42 Filler project*
 
 ## ACHTUNG
 
-./fillit_checker just compares output of two fillit executables, keep it in mind!!!
+./fillit_checker parse output of the `./filler_vm -q` command<br />
+Example of this output:
+```
+# -------------- VM  version 1.1 ------------- #
+#                                              #
+# 42 / filler VM Developped by: Hcao - Abanlin #
+#                                              #
+# -------------------------------------------- #
+launched resources/players/carli.filler
+launched ./vbrazas/vbrazas.filler
+== O fin: 0
+== X fin: 169
+```
 You can always get more information about checker if you take look on its source code in *fillit_checker.zsh* file<br />
-As etalon of the fillit you can always use @akondaur with @osyrotiu fillit, which placed in project folder as etalon_fillit
 
 ## How to install ?
 
@@ -13,10 +24,6 @@ As etalon of the fillit you can always use @akondaur with @osyrotiu fillit, whic
 
 ## How to use ?
 
-	chmod +x fillit_checker.zsh
+	chmod +x filler_checker.zsh
 
-	Usage ./fillit_checker.zsh (-v|-i) <1st_fillit_folder> <2nd_fillit_folder><br />
-	**-v**: launch main valid test<br />
-	**-i**: launch incorrect test<br />
-
-## Special thanks to @hqro for the beautiful tetraminos-generator and to @akondaur:@osyrotiu for perfect etalon fillit
+	Usage: ./filler_checker.zsh [xlogin.filler name] [filler_vm path]
