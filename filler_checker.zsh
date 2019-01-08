@@ -23,7 +23,7 @@ check_arg()
 	eval "$1 &> /dev/null"
 	if (( $? != $2 )); then
 		echo "${RED}Error: wrong path: $tmp"
-		echo "${BLUE}Usage: $1 [xlogin.filler name] [filler_vm path]"
+		echo "${BLUE}Usage: $3 [xlogin.filler name] [filler_vm path]"
 		exit 1;
 	fi
 }
@@ -36,16 +36,16 @@ fill_arg()
 		tmp=$2
 	fi
 
-	check_arg "ls $tmp" 0
+	check_arg "ls $tmp" 0 $0
 
 	eval "$4=$tmp"
 }
 fill_arg $0 "$1" "xlogin.filler" FILE_TO_CHECK
 fill_arg $0 "$2" "./filler_vm" VM_PATH
 
-check_arg "ls $VM_PATH/players/" 0
+check_arg "ls $VM_PATH/players/" 0 $0
 PLAYERS_D="$VM_PATH/players/"
-check_arg "ls $VM_PATH/players/" 0
+check_arg "ls $VM_PATH/players/" 0 $0
 MAPS_D="$VM_PATH/maps/"
 
 
@@ -58,7 +58,7 @@ sychronize()
 }
 
 
-check_arg "./$VM_PATH/filler_vm -q -f ${MAPS_D}$(echo $MAPS | cut -d' ' -f1) -p1 ./$FILE_TO_CHECK -p2 ./${PLAYERS_D}$(echo $PLAYERS | cut -d' ' -f1).filler" 1
+check_arg "./$VM_PATH/filler_vm -q -f ${MAPS_D}$(echo $MAPS | cut -d' ' -f1) -p1 ./$FILE_TO_CHECK -p2 ./${PLAYERS_D}$(echo $PLAYERS | cut -d' ' -f1).filler" 1 $0
 echo -n > $TEMPFILE
 for	pname in `echo $PLAYERS`; do
 	for mapname in `echo $MAPS`; do
