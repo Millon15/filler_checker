@@ -8,46 +8,56 @@ MAG='\e[95m'
 BLUE='\e[1;34m'
 RESET='\e[0m'
 
-PLAYERS="abanlin carli champely"
-# grati hcao superjeannot"
-MAPS="map00 map01"
-# map02"
+PLAYERS="abanlin carli champely grati hcao superjeannot"
+MAPS="map00 map01 map02"
 
 NUM_TESTS=5
 TEMPFILE=".tmpfile"
-MAX_NUM_OF_FILLER_VM_PROCESSES=12
+MAX_NUM_OF_FILLER_VM_PROCESSES=$(( $NUM_TESTS * 2 ))
 
 
+put_usage()
+{
+	echo "${YELLOW}List of maps and players to test you can always change in the head of the ./filler_checker.zsh file"
+	echo "${YELLOW}Be aware! Checker folder must contain the filler's resources/ directory"
+	echo "${BLUE}Usage: ./filler_checker.zsh [xlogin.filler]"
+	echo "Example: ./filler_checker.zsh ../filler/vbrazas.filler"
+	exit 1;
+}
 check_arg()
 {
 	eval "$1 &> /dev/null"
 	if (( $? != $2 )); then
-		echo "${RED}Error - wrong path: $tmp"
-		echo "${YELLOW}List of maps and players to test you can always change in the head of the ./filler_checker.zsh file"
-		echo "${BLUE}Usage: ./filler_checker.zsh [xlogin.filler] [filler_vm_path]"
-		echo "Example: ./filler_checker.zsh ../filler/vbrazas.filler resources/"
-		exit 1;
+		put_usage
 	fi
 }
-
 fill_arg()
 {
-	if [[ ! $2 ]]; then
+	if [[ ! "$2" ]]; then
 		echo -n "Input path to the $3 path: "; read -r tmp
 	else
 		tmp=$2
 	fi
 
-	check_arg "ls $tmp" 0
+	if [[ ! -f $tmp ]]; then
+		echo "${RED}Error - path not found: $tmp"
+		put_usage
+	fi
 
 	eval "$4=$tmp"
 }
 fill_arg $0 "$1" "xlogin.filler" FILE_TO_CHECK
-fill_arg $0 "$2" "./filler_vm" VM_PATH
+VM_PATH=resources/
 
-check_arg "ls $VM_PATH/players/" 0
+if [[ ! -d $VM_PATH/players/ ]]; then
+	echo "${RED}Error - path not found: $VM_PATH/players/"
+	put_usage
+fi
 PLAYERS_D="$VM_PATH/players/"
-check_arg "ls $VM_PATH/players/" 0
+if [[ ! -d $VM_PATH/maps/ ]]; then
+	echo "${RED}Error - path not found: $VM_PATH/maps/"
+	put_usage
+fi
 MAPS_D="$VM_PATH/maps/"
 
 
@@ -59,16 +69,18 @@ sychronize()
 	done
 }
 
-
-check_arg "./$VM_PATH/filler_vm -q -f ${MAPS_D}$(echo $MAPS | cut -d' ' -f1) -p1 ./$FILE_TO_CHECK -p2 ./${PLAYERS_D}$(echo $PLAYERS | cut -d' ' -f1).filler" 1
+if ./$VM_PATH/filler_vm -q -f ${MAPS_D}$(echo $MAPS | cut -d' ' -f1) -p1 ./$FILE_TO_CHECK -p2 ./${PLAYERS_D}$(echo $PLAYERS | cut -d' ' -f1).filler 1> /dev/null; then
+	echo "${RED}Error - when try to execute test command, check ./$VM_PATH/filler_vm file!"
+	put_usage
+fi
 echo -n > $TEMPFILE
 echo -n $BLUE
-for	pname in `echo $PLAYERS`; do
-	for mapname in `echo $MAPS`; do
+for mapname in `echo $MAPS`; do
+	for	pname in `echo $PLAYERS`; do
 		for (( i = 0; i < $NUM_TESTS; i++ )); do
 			(./$VM_PATH/filler_vm -q -f ${MAPS_D}$mapname -p2 ./$FILE_TO_CHECK -p1 ./${PLAYERS_D}${pname}.filler | grep -B 2 "==" >> $TEMPFILE; echo $mapname >> $TEMPFILE) &
 			(./$VM_PATH/filler_vm -q -f ${MAPS_D}$mapname -p1 ./$FILE_TO_CHECK -p2 ./${PLAYERS_D}${pname}.filler | grep -B 2 "==" >> $TEMPFILE; echo $mapname >> $TEMPFILE) &
-			if (( $(pgrep ruby | wc -l) >= $MAX_NUM_OF_FILLER_VM_PROCESSES )); then sychronize; fi
+			if (( $(pgrep ruby | wc -l) + 1 >= $MAX_NUM_OF_FILLER_VM_PROCESSES )); then sychronize; fi
 		done
 	done
 done
@@ -105,4 +117,4 @@ while read -r line; do
 done < "$TEMPFILE"
 
 echo "${BLUE}Your result: $correct/$all"
-rm -f filler.trace
+rm -f filler.trace $TEMPFILE

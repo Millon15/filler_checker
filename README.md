@@ -29,10 +29,11 @@ You can always get more information about checker if you take look on its source
 	chmod +x filler_checker.zsh
 
 ```bash
-Usage: ./filler_checker.zsh [xlogin.filler] [filler_vm_path]
-Example: ./filler_checker.zsh ../filler/vbrazas.filler resources/
+Usage: ./filler_checker.zsh [xlogin.filler]
+Example: ./filler_checker.zsh ../filler/vbrazas.filler
 ```
 
+#### Be aware! Checker folder must contain the filler's resources/ directory
 #### NOTE: List of maps and players to test you can always change in the head of the ./filler_checker.zsh files
 
 ```bash
